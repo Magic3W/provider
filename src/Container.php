@@ -37,7 +37,7 @@ class Container implements \Psr\Container\ContainerInterface
 	 */
 	private $items = [];
 	
-	public function __construct(Container $prototype = null)
+	public function __construct(?Container $prototype = null)
 	{
 		$this->prototype = $prototype;
 		
