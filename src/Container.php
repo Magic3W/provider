@@ -33,7 +33,7 @@ class Container implements \Psr\Container\ContainerInterface
 	
 	/**
 	 *
-	 * @var BindingInterface<object>[]
+	 * @var array<class-string,BindingInterface<object>>
 	 */
 	private $items = [];
 	

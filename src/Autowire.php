@@ -1,6 +1,6 @@
 <?php namespace spitfire\provider;
 
-use ReflectionClass;
+use ReflectionClass as RC;
 use ReflectionException;
 use ReflectionNamedType;
 use ReflectionParameter;
@@ -25,16 +25,31 @@ class Autowire
 	/**
 	 *
 	 * @template T of Object
-	 * @param ReflectionClass<T> $reflection
+	 * @param RC<T> $reflection
 	 * @param mixed[] $overrides
 	 * @return T
 	 */
-	public function class(ReflectionClass $reflection, array $overrides = []) : object
+	public function class(RC $reflection, array $overrides = []) : object
 	{
-		
-		$method     = $reflection->getMethod('__construct');
-		$required   = $method->getParameters();
-		
+		try {
+			$method = $reflection->getMethod('__construct');
+			if ($method === null) { return $reflection->newInstance(); }
+			return $this->makeClassWithParameters($reflection, $method->getParameters(), $overrides);
+		}
+		catch (ReflectionException $e) {
+			return $reflection->newInstance();
+		}
+	}
+	
+	/**
+	 * @template T of Object
+	 * @param RC<T> $reflection
+	 * @param ReflectionParameter[] $params
+	 * @param mixed[] $overrides
+	 * @return T
+	 */
+	private function makeClassWithParameters(RC $reflection, array $params = [], array $overrides = []) : object
+	{
 		$parameters = array_map(function (ReflectionParameter $e) use ($overrides) {
 			$name  = $e->getName();
 			
@@ -43,7 +58,7 @@ class Autowire
 			}
 			
 			return $overrides[$name];
-		}, $required);
+		}, $params);
 		
 		return $reflection->newInstance(...$parameters);
 	}
